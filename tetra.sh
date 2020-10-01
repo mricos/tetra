@@ -37,9 +37,9 @@ tetra-restart(){
   systemctl restart nginx 
 }
 
- tetra-status(){
- networkctl status
- systemctl status nginx 
+tetra-status(){
+  networkctl status
+  systemctl status nginx
 }
 
 tetra-path(){
@@ -51,4 +51,36 @@ printf "%s" "server {
         }
     }
 "
+}
+
+tetra-config(){
+  apt-get update
+  apt-get -y upgrade
+  snap install node --classic --channel=14
+  tetra-create-admin
+  tetra-keys-copy-root admin
+  su admin
+  git clone https://github.com/mricos/tetra.git
+}
+
+tetra-create-admin(){
+  adduser --disabled-password \
+          --ingroup sudo \
+          --gecos "" \
+          admin
+  echo "%sudo   ALL=(ALL:ALL)  NOPASSWD: ALL" >> /etc/sudoers
+
+}
+
+tetra-keys-copy-root(){
+  mkdir /home/$1/.ssh
+  cp /root/.ssh/authorized_keys /home/$1/.ssh/authorized_keys
+  chown -R $1:$1 /home/$1/.ssh
+  chmod 0700 /home/$1/.ssh
+  chmod 0600 /home/$1/.ssh/authorized_keys
+}
+
+
+tetra-usage(){
+ du -h | sort -hr | head
 }
